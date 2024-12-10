@@ -2,7 +2,10 @@
     "admin": {
       "email": "gopinath.r+a@etana.com",
       "password": "SmartWork@1234",
-      "invalidPassword": "SmartWork@123"
+      "invalidPassword": "SmartWork@123",
+      "firstName":"Gobinath",
+      "lastName":" Ravichandran"
+
     },
     "investor": {
       "email": "gopinath.r+001@etana.com",
