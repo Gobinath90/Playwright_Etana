@@ -1,0 +1,18 @@
+{
+    "admin": {
+      "email": "gopinath.r+a@etana.com",
+      "password": "SmartWork@1234",
+      "invalidPassword": "SmartWork@123"
+    },
+    "investor": {
+      "email": "gopinath.r+001@etana.com",
+      "password": "SmartWork@1234",
+      "invalidPassword": "SmartWork@123"
+    },
+    "invalid": {
+        "email": "gopinath+a@etana.com",
+        "password": "SmartWork@123"
+      }
+
+  }
+  
