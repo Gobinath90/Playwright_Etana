@@ -118,5 +118,68 @@ test.describe('Account Screen Testcase Verification', () => {
         });
     });
 
+    test('@regression: Verify that the Webhook Key and API Key values are displayed', async () => {
+        await test.step('Click on show button and get the Text for Webhook Key', async () => {
+            await accountPage.clickWebhookKey();
+        });
+        await test.step('Click on show button and get the Text for API Key', async () => {
+            await accountPage.clickApiKey();
+
+        });
+    });
+
+    test('@regression: Verify Webhook and API key copy functionality', async ({ page }) => {
+        await test.step('Copy Webhook key and verify status message', async () => {
+            const webhookMessage = await accountPage.copyWebhookKey();
+            expect(webhookMessage).toBe("Webhook key copied to clipboard.");
+            await page.waitForTimeout(3000);
+        });
+
+        await test.step('Copy API key and verify status message', async () => {
+            const apiKeyMessage = await accountPage.copyApiKey();
+            expect(apiKeyMessage).toBe("API key copied to clipboard.");
+        });
+    });
+
+    test('@regression: Verify visibility of Save and Cancel buttons on Edit Info', async () => {
+        await test.step('Click on Edit Info button', async () => {
+            await accountPage.clickEditInfo();
+        });
+
+        await test.step('Check visibility of Save and Cancel buttons', async () => {
+            await accountPage.checkAndEditInfo();
+        });
+    });
+
+    test('@regression: Verify User Information Editing (FirstName and LastName) and cancel changes', async () => {
+        await test.step('Click on Edit Info button', async () => {
+            await accountPage.clickEditInfo();
+        });
+
+        await test.step('Edit User Information and cancel changes', async () => {
+            await accountPage.editInfo(testData.admin.firstName, testData.admin.lastName);
+            await accountPage.clickCancelChanges();
+        });
+    });
+
+    test('@regression: Verify User Information Editing (FirstName and LastName) and save changes', async () => {
+        await test.step('Click on Edit Info button', async () => {
+            await accountPage.clickEditInfo();
+        });
+
+        await test.step('Edit User Information and save changes', async () => {
+            await accountPage.editInfo(testData.admin.firstName, testData.admin.lastName);
+            await accountPage.clickSaveChanges();
+        });
+    });
+
+    test('@regression: Verify account is verified', async () => {
+        await test.step('Check if account is verified', async () => {
+            await accountPage.checkVerifiedVisible();
+        });
+    });
+
+
+
 });
 

@@ -51,6 +51,7 @@ class BasePage {
 
 	async waitAndFill(selector, text, elementName) {
 		console.log(`Filling ${elementName} with ${text}`)
+		await this.page.fill(selector, '');
 		return await this.page.fill(selector, text)
 	}
 
@@ -138,17 +139,13 @@ class BasePage {
 		}
 	}
 
-	async isElementVisible(selector, errorMessage) {
-		const element = this.page.locator(selector)
-		try {
-			const isVisible = await element.isVisible()
-			console.log(`Element ${selector} is visible`)
-			return isVisible
-		} catch (error) {
-			console.log(`Element ${selector} is NOT visible`)
-			throw new Error(`${errorMessage}`)
-		}
+	async isElementVisible(selector, elementName) {
+		const element = this.page.locator(selector);
+		const isVisible = await element.isVisible();
+		console.log(isVisible ? `${elementName} is visible` : `${elementName} is NOT visible`);
+		return isVisible;
 	}
+
 	async isElementNotVisible(selector) {
 		const element = this.page.locator(selector)
 		try {
