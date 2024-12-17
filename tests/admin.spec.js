@@ -1,7 +1,7 @@
 import test from '../testFixtures/fixture';
 import { expect } from '@playwright/test';
 import fs from 'fs';
-import { LoginPage, LogoutPage, HomePage, SideMenuPage, AccountPage } from '../pages';
+import { LoginPage, LogoutPage, HomePage, SideMenuPage, AccountPage, OrganizationPage } from '../pages';
 
 const testData = JSON.parse(fs.readFileSync(`./data/users.json`, `utf-8`));
 // Utility to initialize page objects
@@ -12,6 +12,7 @@ const initializePages = (page) => {
         homePage: new HomePage(page),
         sideMenuPage: new SideMenuPage(page),
         accountPage: new AccountPage(page),
+        organizationPage: new OrganizationPage(page),
     };
 };
 
@@ -183,3 +184,179 @@ test.describe('Account Screen Testcase Verification', () => {
 
 });
 
+
+test.describe.only('Organization Screen Testcase Verification', () => {
+    let loginPage, sideMenuPage, organizationPage;
+
+    test.beforeEach(async ({ page }) => {
+        ({ loginPage, sideMenuPage, organizationPage } = initializePages(page));
+
+        await test.step('Open the application, login, and navigate to Organization page', async () => {
+            await loginPage.openApp();
+            await loginPage.loginCredentials(testData.admin.email, testData.admin.password);
+            await sideMenuPage.sideMenu('Organization');
+            await page.waitForTimeout(2000);
+        });
+    });
+
+    test('@regression: Verify Organization Page Title', async () => {
+        await test.step('Verify the Organization Page title is correct', async () => {
+            const organizationTitle = await organizationPage.verifyOrganizationTitle();
+            expect(organizationTitle).toEqual("Organization");
+        });
+    });
+
+    test('@regression: Verify that the Organization User Page displays both Admin and Investor users correctly.', async () => {
+        await test.step('Check for the presence of two separate list views:', async () => {
+            const admininvestortext = await organizationPage.clickdownArrowButton();
+            expect(admininvestortext).toEqual(['Admins', 'Investors']);
+        });
+    });
+
+    test('@regression: Verify that the search results display the correct users based on the email address entered.', async () => {
+        await test.step('Enter an Registered email address in the search field:', async () => {
+            const searchData = await organizationPage.enterSearch("tester2024@gmail.com");
+            expect(searchData).toEqual("tester2024@gmail.com");
+        });
+    });
+
+    test('@regression: Verify that when an unregistered email address is searched, appropriate messages are displayed.', async () => {
+        await test.step('Enter an unregistered email address in the search field.', async () => {
+            const invalidsearchData = await organizationPage.enterInvalidSearch(testData.invalid.email);
+            expect(invalidsearchData).toEqual(["No admins", "No investors"]);
+        });
+    });
+
+    test('@regression: Verify that the admin user can see the "Invite New User" button on the Organization User page.', async () => {
+        await test.step('Review the page for the "Invite New User" button.', async () => {
+            const InviteNewUserData = await organizationPage.getAdminInviteNewUser();
+            expect(InviteNewUserData).toEqual("Invite New User");
+        });
+    });
+
+    test('@regression: Verify the Organization User Page Opens After Inviting a New User', async () => {
+        await test.step('Click on the "Invite New User" button. ', async () => {
+            const inviteUsertoOrganizationData = await organizationPage.clickAdminInviteNewUser();
+            expect(inviteUsertoOrganizationData).toEqual("Invite User to Organization");
+        });
+    });
+
+    test('@regression: Verify that Clicking Cancel Does Not Add the User', async () => {
+
+        await test.step('Click on the "Invite New User" button. ', async () => {
+            const inviteUsertoOrganizationData = await organizationPage.clickAdminInviteNewUser();
+            expect(inviteUsertoOrganizationData).toEqual("Invite User to Organization");
+        });
+
+        await test.step('Fill the form with Name, Family Name, Email Address, and select an access role (Admin/Manager) ', async () => {
+            await organizationPage.fillAndInviteUserForm("tesingNew", "testExits", "testnew2024@gmail.com");
+        });
+
+        await test.step('Click on the "Cancel" button.', async () => {
+            await organizationPage.clickCancelButton();
+        });
+
+        await test.step('Observe that the user is redirected to the Organization User page.', async () => {
+            const organizationTitle = await organizationPage.verifyOrganizationTitle();
+            expect(organizationTitle).toEqual("Organization");
+        });
+    });
+
+    test('@regression: Verify Adding a New User Invited', async () => {
+
+        await test.step('Click on the "Invite New User" button. ', async () => {
+            const inviteUsertoOrganizationData = await organizationPage.clickAdminInviteNewUser();
+            expect(inviteUsertoOrganizationData).toEqual("Invite User to Organization");
+        });
+
+        await test.step('Fill the form with Name, Family Name, Email Address, and select an access role (Admin/Manager) ', async () => {
+            await organizationPage.fillAndInviteUserForm("tesingNew", "testExits", "testnew2030@gmail.com");
+        });
+
+        await test.step('Click on the "Submit" button.', async () => {
+            await organizationPage.clickSubmitButton();
+        });
+
+        await test.step('Observe that the user is redirected to the Organization User page.', async () => {
+            const admintoasterData = await organizationPage.checkAdminToasterMessage("testnew2030@gmail.com");
+            expect(admintoasterData).toEqual("Invitation email sent to testnew2030@gmail.com");
+        });
+
+        await test.step('Locate the new user in the role-based list view.', async () => {
+
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+    });
+
+    test('@regression: Verify User Invitation and Display on Organization User Page', async () => {
+
+        await test.step('Locate the new user in the role-based list view.', async () => {
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+
+    });
+
+    test('@regression: Verify Editing User Details for Admin / Investor Users', async () => {
+
+        await test.step('Locate the new user in the role-based list view.', async () => {
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+
+        await test.step('Click on the Edit icon.', async () => {
+            await organizationPage.clickeditIcon();
+        });
+
+        await test.step('Edit the First Name and Last Name, and then Click on the tick icon to save changes.', async () => {
+            const toasterEditMessage = await organizationPage.editfirstlastname("testnew2030@gmail.com", "Newtest", "Testing");
+            expect(toasterEditMessage).toEqual("User updated");
+        });
+    });
+
+    test('@regression: Verify Admin User Actions on Organization User Page', async () => {
+
+        await test.step('Locate the new user in the role-based list view.', async () => {
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+
+        await test.step('Click on the Delete icon next to a specific user.', async () => {
+            await organizationPage.clickDeleteIcon();
+        });
+
+        await test.step('Click on the "Cancel" button in the deletion confirmation prompt.', async () => {
+            await organizationPage.clickCancelButton();
+        });
+
+        await test.step('Observe the user interface after canceling the deletion', async () => {
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+    });
+
+    test('@regression: Verify Deleting User Details for Admin / Investor Users', async () => {
+
+        await test.step('Locate the new user in the role-based list view.', async () => {
+            const searchData = await organizationPage.enterSearch("testnew2030@gmail.com");
+            expect(searchData).toEqual("testnew2030@gmail.com");
+        });
+
+        await test.step('Click on the Delete icon next to a specific user.', async () => {
+            await organizationPage.clickDeleteIcon();
+        });
+
+        await test.step('Enter the email address and click on the "Submit" button.', async () => {
+            await organizationPage.inputEmailAddress("testnew2030@gmail.com");
+            await organizationPage.clickSubmitButton();
+        });
+
+        await test.step('Search for the deleted user again in the search field.', async () => {
+            const invalidsearchData = await organizationPage.enterInvalidSearch("testnew2030@gmail.com");
+            expect(invalidsearchData).toEqual(["No admins", "No investors"]);
+        });
+
+    });
+
+});
